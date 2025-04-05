@@ -3,6 +3,8 @@ import asyncio
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from telegram import Bot
 from datetime import datetime
 import time
@@ -31,16 +33,20 @@ async def run():
         driver.get("https://clubspark.lta.org.uk/PrioryPark2/Booking")
 
         # Войти
-        login_btn = driver.find_element(By.XPATH, "//a[contains(text(),'Sign in')]")
+        login_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//a[contains(text(),'Sign in')]"))
+        )
         login_btn.click()
-        time.sleep(2)
+
+        # Ждём поля email
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "email")))
 
         driver.find_element(By.NAME, "email").send_keys(EMAIL)
         driver.find_element(By.NAME, "password").send_keys(PASSWORD)
         driver.find_element(By.XPATH, "//button[contains(text(),'Sign in')]").click()
-        time.sleep(3)
 
         await notify("✅ Авторизация прошла успешно.")
+        time.sleep(4)
 
         # Пролистываем ближайшие дни
         days_checked = 0
