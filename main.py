@@ -1,3 +1,4 @@
+
 import os
 import asyncio
 from selenium import webdriver
@@ -8,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from telegram import Bot
 from datetime import datetime
 import time
+import traceback
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
@@ -31,20 +33,22 @@ async def run():
 
     try:
         driver.get("https://clubspark.lta.org.uk/PrioryPark2/Booking")
+        await notify("🌐 Открыта страница бронирования")
 
         # Войти
+        await notify("🔍 Ищу кнопку входа...")
         login_btn = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//a[contains(text(),'Sign in')]"))
         )
         login_btn.click()
+        await notify("✅ Кнопка входа найдена и нажата")
 
         # Ждём поле логина
+        await notify("⌛ Жду поле логина...")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "email")))
-
         driver.find_element(By.NAME, "email").send_keys(USERNAME)
         driver.find_element(By.NAME, "password").send_keys(PASSWORD)
         driver.find_element(By.XPATH, "//button[contains(text(),'Sign in')]").click()
-
         await notify("✅ Авторизация прошла успешно.")
         time.sleep(4)
 
@@ -52,6 +56,7 @@ async def run():
         days_checked = 0
         booked = False
         while days_checked < 7 and not booked:
+            await notify(f"📅 Проверяю день {days_checked + 1}...")
             time.sleep(3)
             slots = driver.find_elements(By.CLASS_NAME, "booking-slot.available")
             for slot in slots:
@@ -70,7 +75,7 @@ async def run():
             await notify("😕 Свободных слотов не найдено.")
 
     except Exception as e:
-        await notify("❌ Ошибка в процессе: " + str(e))
+        await notify("❌ Ошибка в процессе:\n" + traceback.format_exc())
     finally:
         driver.quit()
 
