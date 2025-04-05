@@ -39,14 +39,22 @@ async def run():
         login_btn.click()
         await notify("✅ Кнопка входа найдена и нажата")
 
-        await notify("⏳ Жду поле логина...")
+        club_login_btn = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Login')]"))
+        )
+        club_login_btn.click()
+        await notify("🟥 Кнопка ClubSpark Login нажата")
+
+        await notify("⌛ Жду поле логина...")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
+
         driver.find_element(By.ID, "username").send_keys(USERNAME)
         driver.find_element(By.ID, "password").send_keys(PASSWORD)
         driver.find_element(By.XPATH, "//button[contains(text(),'Sign in')]").click()
-        await notify("✅ Авторизация прошла успешно.")
 
+        await notify("✅ Авторизация прошла успешно.")
         time.sleep(4)
+
         days_checked = 0
         booked = False
         while days_checked < 7 and not booked:
@@ -54,9 +62,9 @@ async def run():
             slots = driver.find_elements(By.CLASS_NAME, "booking-slot.available")
             for slot in slots:
                 text = slot.text.lower()
-                if any(hour in text for hour in ["08:00", "09:00", "15:00", "16:00"]):
+                if "16:00" in text or "08:00" in text or "15:00" in text or "09:00" in text:
                     slot.click()
-                    await notify("🎾 Найден доступный слот: " + text + " — тест клик выполнен!")
+                    await notify("🎾 Нашёл доступный слот: " + text + " — тест клик выполнен!")
                     booked = True
                     break
             if not booked:
@@ -66,9 +74,9 @@ async def run():
 
         if not booked:
             await notify("😕 Свободных слотов не найдено.")
+
     except Exception as e:
-        driver.save_screenshot("error.png")
-        await notify("❌ Ошибка в процессе: " + str(e))
+        await notify("❌ Ошибка в процессе:\n" + str(e))
     finally:
         driver.quit()
 
