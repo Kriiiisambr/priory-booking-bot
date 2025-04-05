@@ -11,7 +11,7 @@ import time
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = os.environ.get("CHAT_ID")
-EMAIL = os.environ.get("BOOKING_EMAIL")
+USERNAME = os.environ.get("BOOKING_USERNAME")
 PASSWORD = os.environ.get("BOOKING_PASSWORD")
 
 bot = Bot(token=BOT_TOKEN)
@@ -38,10 +38,10 @@ async def run():
         )
         login_btn.click()
 
-        # Ждём поля email
+        # Ждём поле логина
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "email")))
 
-        driver.find_element(By.NAME, "email").send_keys(EMAIL)
+        driver.find_element(By.NAME, "email").send_keys(USERNAME)
         driver.find_element(By.NAME, "password").send_keys(PASSWORD)
         driver.find_element(By.XPATH, "//button[contains(text(),'Sign in')]").click()
 
